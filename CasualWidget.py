@@ -2,7 +2,7 @@ import flet as ft
 import requests
 import pycountry
 import random
-
+import os
 
 def main(page: ft.Page):
     page.title = "Weather searching app"
@@ -273,11 +273,79 @@ def main(page: ft.Page):
         ),
         alignment=ft.alignment.center,
     )
+    # ----- Signature generator -----
+    page.assets_dir = "assets"
 
+    font_path = os.path.join(page.assets_dir, "./DancingScript-Regular.ttf")
+
+    if not os.path.exists(font_path):
+        print("❌ ERROR: Font file not found:", font_path)
+    else:
+        page.fonts = {
+            "MyCustomFont": font_path
+        }
+
+    name_input = ft.TextField(
+        label="Введіть ваше ім’я",
+        hint_text="Наприклад: Олександр",
+        autofocus=True,
+        width=350,
+        text_size=16,
+    )
+
+    signature_text = ft.Text(
+        "",
+        size=48,
+        weight=ft.FontWeight.W_600,
+        italic=True,
+        text_align=ft.TextAlign.CENTER,
+        font_family="MyCustomFont",
+    )
+
+    subtitle = ft.Text(
+        "Натисніть кнопку, щоб згенерувати підпис",
+        size=12,
+        opacity=0.7,
+        text_align=ft.TextAlign.CENTER,
+    )
+
+    def generate_signature(e):
+        name = name_input.value.strip()
+        if not name:
+            signature_text.value = ""
+            subtitle.value = "Будь ласка, введіть ім’я 🙂"
+        else:
+            signature_text.value = name
+            subtitle.value = "Ваш підпис готовий ✨"
+        page.update()
+
+    generate_button = ft.ElevatedButton(
+        text="Згенерувати підпис",
+        on_click=generate_signature,
+        width=200,
+        style=ft.ButtonStyle(
+            shape=ft.RoundedRectangleBorder(radius=20),
+        ),
+    )
+    fontGeneratorContainer = ft.Container(
+        content=ft.Column(
+            controls=[
+                ft.Text("Генератор підпису", size=26, weight=ft.FontWeight.BOLD),
+                name_input,
+                generate_button,
+                ft.Divider(),
+                subtitle,
+                signature_text,
+            ],
+            alignment=ft.MainAxisAlignment.START,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=15,
+        )
+    )
     # ----- Final page layout -----
     page.add(
         ft.Column(
-            controls=[weatherStructure, newsStructure],
+            controls=[weatherStructure, newsStructure, fontGeneratorContainer],
             scroll="always",
             expand=True
         )
