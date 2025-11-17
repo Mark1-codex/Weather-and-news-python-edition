@@ -14,7 +14,6 @@ def main(page: ft.Page):
     # ----- Title -----
     titleWeatherText = ft.Text(
         value="Weather dashboard",
-        color="#FFFFFF",
         weight="bold",
         size=20
     )
