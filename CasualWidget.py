@@ -4,6 +4,9 @@ import pycountry
 import random
 import os
 
+
+
+
 def main(page: ft.Page):
     page.title = "Weather searching app"
     page.theme_mode = ft.ThemeMode.DARK
@@ -102,7 +105,7 @@ def main(page: ft.Page):
                     dt_txt = item["dt_txt"].split(" ")[0]
                     temp = int(item["main"]["temp"])
                     icon = item["weather"][0]["icon"]
-
+                    global forecastCard
                     forecastCard = ft.Container(
                         content=ft.Column(
                             spacing=5,
@@ -190,6 +193,7 @@ def main(page: ft.Page):
         content=newsDataReturn,
         alignment=ft.alignment.center,
     )
+
     # ----- NEWS API -----
     def newsUpdate(e):
 
@@ -244,7 +248,8 @@ def main(page: ft.Page):
 
             titleND.value = article.get("title", "No title available")
             descND.value = article.get("description", "No description available")
-            photoCont.src = article.get("image", "https://png.pngtree.com/png-vector/20221125/ourmid/pngtree-no-image-available-icon-flatvector-illustration-pic-design-profile-vector-png-image_40966566.jpg")
+            photoCont.src = article.get("image",
+                                        "https://png.pngtree.com/png-vector/20221125/ourmid/pngtree-no-image-available-icon-flatvector-illustration-pic-design-profile-vector-png-image_40966566.jpg")
             newsDataReturn.visible = True
 
             moreDataND.spans = [
@@ -342,10 +347,51 @@ def main(page: ft.Page):
             spacing=15,
         )
     )
+
+    # ----- Theme mode switcher -----
+    def themeSwitch(currentSelect):
+        # Protect from using forecastCard before it exists
+        has_forecast = "forecastCard" in globals()
+
+        if currentSelect == "Light theme":
+            page.theme_mode = ft.ThemeMode.LIGHT
+            newsDataReturn.bgcolor = "#F2F2F2"
+            if has_forecast:
+                forecastCard.bgcolor = "#F2F2F2"
+
+        elif currentSelect == "Dark theme":
+            page.theme_mode = ft.ThemeMode.DARK
+            newsDataReturn.bgcolor = "#263238"
+            if has_forecast:
+                forecastCard.bgcolor = "#37474F"
+
+        else:
+            page.theme_mode = ft.ThemeMode.DARK
+            newsDataReturn.bgcolor = "#263238"
+            if has_forecast:
+                forecastCard.bgcolor = "#37474F"
+
+        page.update()
+
+    themeSwitcher = ft.Dropdown(
+        options=[
+            ft.DropdownOption("Light theme"),
+            ft.DropdownOption("Dark theme"),
+        ],
+        label="Switch app theme",
+    )
+
+    # Corrected event binding
+    themeSwitcher.on_change = lambda e: themeSwitch(themeSwitcher.value)
+
+    themeSwitchContainer = ft.Container(
+        content=themeSwitcher,
+        alignment=ft.alignment.center,
+    )
     # ----- Final page layout -----
     page.add(
         ft.Column(
-            controls=[weatherStructure, newsStructure, fontGeneratorContainer],
+            controls=[weatherStructure, newsStructure, fontGeneratorContainer, ft.Divider(), themeSwitchContainer],
             scroll="always",
             expand=True
         )
