@@ -3,7 +3,7 @@ import requests
 import pycountry
 import random
 import os
-
+from datetime import datetime, timedelta
 
 
 
@@ -36,6 +36,7 @@ def main(page: ft.Page):
     feelsD = ft.Text(value="Feels like", size=14, text_align=ft.TextAlign.CENTER)
     humidityD = ft.Text(value="Humidity", size=10)
     mainwD = ft.Image(width=100, height=100)
+    timeD = ft.Text(value="Local time", size=14)
 
     tempData = ft.Column(spacing=5, controls=[tempD, feelsD], alignment=ft.alignment.center)
 
@@ -43,7 +44,7 @@ def main(page: ft.Page):
         content=ft.Column(
             spacing=10,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            controls=[mainwD, cityD, tempData, humidityD],
+            controls=[mainwD, cityD, tempData, humidityD, timeD],
         ),
         alignment=ft.alignment.center,
         bgcolor="#263238",
@@ -86,8 +87,12 @@ def main(page: ft.Page):
             feels = data["main"]["feels_like"]
             humidity = data["main"]["humidity"]
             icon_code = data["weather"][0]["icon"]
+            utc_time = datetime.utcfromtimestamp(data["dt"])
+            timezone_offset = data["timezone"]  # seconds
+            local_time = utc_time + timedelta(seconds=timezone_offset)
 
             dataReturn.visible = True
+            timeD.value = f"Local time: {local_time.strftime('%H:%M')}"
             cityD.value = f"City: {city}"
             tempD.value = f"Temperature: {int(temp)}℃"
             feelsD.value = f"Feels like: {int(feels)}℃"
@@ -104,6 +109,12 @@ def main(page: ft.Page):
                     dt_txt = item["dt_txt"].split(" ")[0]
                     temp = int(item["main"]["temp"])
                     icon = item["weather"][0]["icon"]
+                    utc_time = datetime.utcfromtimestamp(data["dt"])
+                    timezone_offset = data["timezone"]  # seconds
+                    local_time = utc_time + timedelta(seconds=timezone_offset)
+
+                    # Update UI
+                    timeD.value = f"Local time: {local_time.strftime('%H:%M')}"
                     global forecastCard
                     forecastCard = ft.Container(
                         content=ft.Column(
@@ -390,7 +401,7 @@ def main(page: ft.Page):
     # ----- Final page layout -----
     page.add(
         ft.Column(
-            controls=[weatherStructure, newsStructure, fontGeneratorContainer, ft.Divider(), themeSwitchContainer],
+            controls=[weatherStructure, ft.Divider(), newsStructure, ft.Divider(), fontGeneratorContainer, ft.Divider(), themeSwitchContainer],
             scroll="always",
             expand=True
         )
